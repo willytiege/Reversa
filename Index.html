@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reversa - Free Version</title>
+<style>
+body{background:#000;color:#fff;font-family:sans-serif;padding:20px}
+textarea{width:100%;height:100px;background:#111;color:#fff;padding:12px;border-radius:12px;border:1px solid #333}
+button{background:#00ff88;color:#000;padding:16px;border:none;border-radius:50px;font-weight:bold;width:100%;font-size:16px}
+.card{background:#111;padding:12px;border-radius:12px;margin:8px 0;display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<h1>🔧 REVERSA</h1>
+<p style="color:gray">Phone version - No server needed</p>
+
+<textarea id="msg" placeholder="Paste alert here: GTB Alert: Transfer of N15,000 to UBA FAILED at 10:23AM"></textarea>
+<br><br>
+<button onclick="track()">TRACK MY MONEY</button>
+
+<div id="reply" style="margin-top:20px;background:#111;padding:15px;border-radius:12px;display:none"></div>
+
+<h3 style="margin-top:30px">📋 My Tickets</h3>
+<div id="list"></div>
+
+<script>
+let tickets = JSON.parse(localStorage.getItem('reversa') || '[]');
+
+function track(){
+  const text = document.getElementById('msg').value;
+  if(!text) return alert('Paste bank alert first');
+  
+  const amountMatch = text.match(/N?([\d,]+)/);
+  const amount = amountMatch ? amountMatch[1] : "5,000";
+  const bankMatch = text.match(/(GTB|Access|UBA|FirstBank|Zenith|OPay|Moniepoint|Kuda)/i);
+  const bank = bankMatch ? bankMatch[0].toUpperCase() : "OTHER BANK";
+  
+  const ticketId = "REV-" + Math.floor(1000+Math.random()*9000);
+  const ticket = { id: ticketId, amount, bank, status: "PENDING", time: new Date().toLocaleTimeString() };
+  
+  tickets.unshift(ticket);
+  localStorage.setItem('reversa', JSON.stringify(tickets));
+
+  const reply = `Omo, I see am! 😅\n\nYour ₦${amount} to ${bank} don hang.\n\nTicket: ${ticketId}\nStatus: DEY TRACK AM ⏳\n\nE go reverse in 30 mins. I go update you.`;
+  
+  document.getElementById('reply').style.display='block';
+  document.getElementById('reply').innerText = reply;
+
+  setTimeout(() => {
+    ticket.status = "REVERSED";
+    localStorage.setItem('reversa', JSON.stringify(tickets));
+    render();
+    alert('✅ Update: Your ₦'+amount+' don reverse back!');
+  }, 30000); // reverses after 30 sec for demo
+
+  render();
+  document.getElementById('msg').value = '';
+}
+
+function render(){
+  document.getElementById('list').innerHTML = tickets.map(t=> 
+    `<div class="card"><span><b>${t.id}</b><br>₦${t.amount} to ${t.bank}<br><small style="color:gray">${t.time}</small></span><b style="color:${t.status=='PENDING'?'yellow':'#00ff88'}">${t.status}</b></div>`
+  ).join('');
+}
+render();
+</script>
+</body>
+</html>
